@@ -1,0 +1,11 @@
+# Credenciales - nunca subir al repo
+src/main/resources/application-sqlserver.properties
+src/main/resources/application-postgres.properties
+
+# Maven
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/

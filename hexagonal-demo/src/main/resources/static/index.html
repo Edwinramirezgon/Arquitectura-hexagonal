@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arquitectura Hexagonal - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+      color: #f8fafc;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #94a3b8;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    /* Badge que muestra la BD activa */
+    #db-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    #db-badge span {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 999px;
+      padding: 0.4rem 1.2rem;
+      font-size: 0.9rem;
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Explicación de la arquitectura */
+    .arch-info {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-left: 4px solid #38bdf8;
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 0.88rem;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+
+    .arch-info strong { color: #f1f5f9; }
+
+    /* Layout de 2 columnas */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus { border-color: #38bdf8; }
+
+    button {
+      width: 100%;
+      padding: 0.65rem;
+      background: #0ea5e9;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover { background: #0284c7; }
+
+    /* Lista de productos */
+    #product-list { list-style: none; }
+
+    #product-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.65rem 0.8rem;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    #product-list li .info { color: #e2e8f0; }
+    #product-list li .price { color: #4ade80; font-weight: 600; }
+
+    .delete-btn {
+      width: auto;
+      padding: 0.3rem 0.7rem;
+      background: #ef4444;
+      font-size: 0.8rem;
+      border-radius: 4px;
+    }
+
+    .delete-btn:hover { background: #dc2626; }
+
+    .empty { color: #475569; text-align: center; padding: 1rem; font-size: 0.9rem; }
+
+    /* Diagrama de capas */
+    .layers {
+      grid-column: 1 / -1;
+    }
+
+    .layer {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .layer-domain   { background: #14532d; border: 1px solid #166534; }
+    .layer-app      { background: #1e3a5f; border: 1px solid #1d4ed8; }
+    .layer-infra    { background: #3b1f5e; border: 1px solid #7c3aed; }
+    .layer-active   { background: #7c2d12; border: 1px solid #c2410c; }
+
+    .layer-icon { font-size: 1.2rem; }
+    .layer-title { font-weight: 700; color: #f1f5f9; min-width: 180px; }
+    .layer-desc { color: #94a3b8; }
+
+    .arrow {
+      text-align: center;
+      color: #475569;
+      font-size: 1.2rem;
+      margin: -0.2rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔷 Arquitectura Hexagonal</h1>
+  <p class="subtitle">Demo de intercambio de base de datos sin tocar el dominio</p>
+
+  <!-- Badge de BD activa -->
+  <div id="db-badge">
+    <div class="dot"></div>
+    <span id="db-name">Cargando...</span>
+  </div>
+
+  <!-- Explicación contextual -->
+  <div class="arch-info" style="max-width:900px;margin:0 auto 2rem;">
+    <strong>¿Qué estás viendo?</strong> Esta UI habla con el mismo backend sin importar qué BD esté activa.
+    El <strong>dominio</strong> (Product, ProductUseCase) nunca cambia.
+    Solo cambia el <strong>adaptador de salida</strong> según el perfil de Spring Boot activo.
+    Para cambiar de BD: edita <code>application.properties</code> → <code>spring.profiles.active=postgres</code> y reinicia.
+  </div>
+
+  <div class="grid">
+
+    <!-- Formulario de creación -->
+    <div class="card">
+      <h2>➕ Crear Producto</h2>
+      <input type="text" id="name" placeholder="Nombre del producto" />
+      <input type="number" id="price" placeholder="Precio (ej: 99.99)" step="0.01" />
+      <button onclick="createProduct()">Guardar en <span id="btn-db">BD activa</span></button>
+    </div>
+
+    <!-- Lista de productos -->
+    <div class="card">
+      <h2>📦 Productos en BD</h2>
+      <ul id="product-list">
+        <li class="empty">Cargando...</li>
+      </ul>
+      <button onclick="loadProducts()" style="margin-top:0.75rem;background:#334155;">
+        🔄 Refrescar lista
+      </button>
+    </div>
+
+    <!-- Diagrama de capas -->
+    <div class="card layers">
+      <h2>🏗️ Capas de la Arquitectura Hexagonal</h2>
+
+      <div class="layer layer-infra">
+        <span class="layer-icon">🌐</span>
+        <span class="layer-title">Adaptador de Entrada</span>
+        <span class="layer-desc">ProductController — Recibe HTTP, traduce a dominio. Si cambias a GraphQL, solo cambia esto.</span>
+      </div>
+      <div class="arrow">↓ usa puerto de entrada ↓</div>
+
+      <div class="layer layer-app">
+        <span class="layer-icon">⚙️</span>
+        <span class="layer-title">Aplicación</span>
+        <span class="layer-desc">ProductService — Orquesta la lógica. No sabe nada de HTTP ni de BD.</span>
+      </div>
+      <div class="arrow">↓ usa puerto de salida ↓</div>
+
+      <div class="layer layer-domain">
+        <span class="layer-icon">💎</span>
+        <span class="layer-title">Dominio</span>
+        <span class="layer-desc">Product, ProductUseCase, ProductRepository — Cero dependencias externas. Nunca cambia.</span>
+      </div>
+      <div class="arrow">↓ implementado por ↓</div>
+
+      <div class="layer layer-active">
+        <span class="layer-icon">🗄️</span>
+        <span class="layer-title">Adaptador Activo</span>
+        <span id="active-adapter-desc" class="layer-desc">Cargando adaptador activo...</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API = 'http://localhost:8080';
+
+    // Al cargar la página, obtenemos la BD activa y los productos
+    window.onload = () => {
+      fetchActiveDb();
+      loadProducts();
+    };
+
+    // Consulta al backend qué perfil/BD está activo
+    async function fetchActiveDb() {
+      const res = await fetch(`${API}/active-db`);
+      const data = await res.json();
+
+      document.getElementById('db-name').textContent = data.db;
+      document.getElementById('btn-db').textContent = data.db;
+
+      // Actualiza la descripción del adaptador activo en el diagrama
+      const descriptions = {
+        sqlserver: 'SqlServerProductAdapter → JPA → SQL Server 2022 en Docker (localhost:1433)',
+        postgres:  'PostgresProductAdapter → JPA → PostgreSQL nativo Mac (localhost:5432)',
+        h2:        'H2ProductAdapter → JPA → H2 en memoria (datos se pierden al reiniciar)'
+      };
+      document.getElementById('active-adapter-desc').textContent =
+        descriptions[data.profile] || data.db;
+    }
+
+    // Carga y renderiza la lista de productos desde la BD activa
+    async function loadProducts() {
+      const res = await fetch(`${API}/products`);
+      const products = await res.json();
+      const list = document.getElementById('product-list');
+
+      if (products.length === 0) {
+        list.innerHTML = '<li class="empty">No hay productos aún</li>';
+        return;
+      }
+
+      // Renderizamos cada producto con su botón de eliminar
+      list.innerHTML = products.map(p => `
+        <li>
+          <div>
+            <span class="info">${p.name}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span class="price">$${p.price.toFixed(2)}</span>
+            <button class="delete-btn" onclick="deleteProduct(${p.id})">✕</button>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    // Envía un nuevo producto al backend
+    async function createProduct() {
+      const name  = document.getElementById('name').value.trim();
+      const price = parseFloat(document.getElementById('price').value);
+
+      if (!name || isNaN(price)) {
+        alert('Completa nombre y precio');
+        return;
+      }
+
+      await fetch(`${API}/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, price })
+      });
+
+      // Limpiamos el formulario y recargamos la lista
+      document.getElementById('name').value  = '';
+      document.getElementById('price').value = '';
+      loadProducts();
+    }
+
+    // Elimina un producto por ID
+    async function deleteProduct(id) {
+      await fetch(`${API}/products/${id}`, { method: 'DELETE' });
+      loadProducts();
+    }
+  </script>
+
+</body>
+</html>

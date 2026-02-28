@@ -1,0 +1,8 @@
+spring.datasource.url=jdbc:postgresql://localhost:5432/hexagonal_demo
+spring.datasource.username=TU_USUARIO_AQUI
+spring.datasource.password=TU_PASSWORD_AQUI
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
