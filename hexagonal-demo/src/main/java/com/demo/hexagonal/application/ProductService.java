@@ -1,8 +1,8 @@
 package com.demo.hexagonal.application;
 
 import com.demo.hexagonal.domain.model.Product;
-import com.demo.hexagonal.domain.port.in.ProductUseCase;
-import com.demo.hexagonal.domain.port.out.ProductRepository;
+import com.demo.hexagonal.application.port.in.ProductUseCase;
+import com.demo.hexagonal.application.port.out.ProductRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 

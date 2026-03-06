@@ -1,6 +1,6 @@
 package com.demo.hexagonal.infrastructure.adapter.out;
 
-import com.demo.hexagonal.domain.port.out.ProductRepository;
+import com.demo.hexagonal.application.port.out.ProductRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

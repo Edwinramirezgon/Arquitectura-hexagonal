@@ -19,9 +19,9 @@ graph TD
     UI["🌐 Frontend (index.html)"]
     CTRL["📡 ProductController\nAdaptador de Entrada"]
     PORT_IN["🔌 ProductUseCase\nPuerto de Entrada"]
-    SVC["⚙️ ProductService\nCapa de Aplicación"]
+    SVC["⚙️ ProductService"]
     PORT_OUT["🔌 ProductRepository\nPuerto de Salida"]
-    DOM["💎 Product\nDominio"]
+    DOM["💎 Product\nDominio puro"]
 
     SQL["🗄️ SqlServerProductAdapter"]
     PG["🐘 PostgresProductAdapter"]
@@ -34,7 +34,7 @@ graph TD
     UI -->|HTTP| CTRL
     CTRL -->|usa| PORT_IN
     PORT_IN -->|implementa| SVC
-    SVC -->|depende de| DOM
+    SVC -->|usa| DOM
     SVC -->|usa| PORT_OUT
     PORT_OUT -->|implementa| SQL
     PORT_OUT -->|implementa| PG
@@ -60,29 +60,29 @@ graph TD
 ```
 src/main/java/com/demo/hexagonal/
 │
-├── domain/                          ← 💎 Núcleo. Cero dependencias externas.
-│   ├── model/
-│   │   └── Product.java             ← Entidad de negocio pura
-│   └── port/
-│       ├── in/
-│       │   └── ProductUseCase.java  ← Puerto de entrada (qué puede hacer la app)
-│       └── out/
-│           └── ProductRepository.java ← Puerto de salida (qué necesita la app)
+├── domain/                              ← 💎 Núcleo puro. Solo entidades y reglas de negocio.
+│   └── model/
+│       └── Product.java                 ← Entidad de negocio. Cero anotaciones de frameworks.
 │
-├── application/                     ← ⚙️ Orquestación. Solo conoce puertos y dominio.
-│   └── ProductService.java
+├── application/                         ← ⚙️ Casos de uso + contratos (puertos).
+│   ├── port/
+│   │   ├── in/
+│   │   │   └── ProductUseCase.java      ← Puerto de entrada: qué puede hacer la aplicación
+│   │   └── out/
+│   │       └── ProductRepository.java   ← Puerto de salida: qué necesita la aplicación
+│   └── ProductService.java              ← Implementa ProductUseCase, usa ProductRepository
 │
-└── infrastructure/                  ← 🔌 Detalles técnicos. Todo lo reemplazable.
+└── infrastructure/                      ← 🔌 Detalles técnicos. Todo lo reemplazable.
     └── adapter/
         ├── in/
-        │   └── ProductController.java      ← Adaptador REST
+        │   └── ProductController.java       ← Adaptador REST (entrada)
         └── out/
-            ├── SqlServerProductAdapter.java ← Adaptador SQL Server
-            ├── PostgresProductAdapter.java  ← Adaptador PostgreSQL
-            ├── H2ProductAdapter.java        ← Adaptador H2
-            ├── ProductEntity.java           ← Entidad JPA
-            ├── JpaProductRepository.java    ← Spring Data JPA
-            └── PersistenceConfig.java       ← Selección de adaptador por perfil
+            ├── SqlServerProductAdapter.java  ← Adaptador SQL Server (salida)
+            ├── PostgresProductAdapter.java   ← Adaptador PostgreSQL (salida)
+            ├── H2ProductAdapter.java         ← Adaptador H2 (salida)
+            ├── ProductEntity.java            ← Entidad JPA
+            ├── JpaProductRepository.java     ← Spring Data JPA
+            └── PersistenceConfig.java        ← Selección de adaptador por perfil
 ```
 
 ---

@@ -1,7 +1,7 @@
 package com.demo.hexagonal.infrastructure.adapter.in;
 
 import com.demo.hexagonal.domain.model.Product;
-import com.demo.hexagonal.domain.port.in.ProductUseCase;
+import com.demo.hexagonal.application.port.in.ProductUseCase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
